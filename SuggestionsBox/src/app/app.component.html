@@ -1,0 +1,88 @@
+<ng4-loading-spinner [threshold]="2000" [loadingText]="'Please wait...'" [zIndex]="9999"></ng4-loading-spinner>
+<ngb-alert *ngIf="successMessage" type="success" (close)="successMessage = null">{{ successMessage }}</ngb-alert>
+<ngb-alert *ngIf="errorMessage" type="danger" (close)="errorMessage = null">{{ errorMessage }}</ngb-alert>
+
+<div class="clearfix" *ngIf="!isAdmin">
+  <div>
+    <button (click)="showSuggestionBox=true" *ngIf="!showSuggestionBox" class="btn btn-warning btn-large float-right">Add a Suggestion</button>
+  </div>
+  <div *ngIf="showSuggestionBox">
+    <div class="input-group col-12">
+      <form novalidate [formGroup]="userForm" (ngSubmit)="postSuggestion(userForm)" class="suggestion-form">
+        <textarea formControlName="userPost" placeholder="Leave a suggestion" 
+        rows="5" cols="20" class="form- col-12"></textarea>
+        <button [disabled]="userForm.invalid" class="btn btn-primary">Post It</button>
+        <button (click)="cancelUserPost()" class="btn btn-secondary">Cancel</button>
+      </form>
+    </div>
+  </div>
+  <div class="pb-5"></div>
+</div>
+
+<div id="accordion" *ngFor="let value of suggestionData; let i = index">
+  <div class="card">
+    <div class="card-header">
+      <div class="row">
+        <p class="float-right text-info font-weight-light w-100">Posted on: {{value.datePosted | date }}</p>
+        <p class="rigth">{{value.userPost}}</p>
+      </div>
+      <div class="mb-0">
+          <div *ngIf="value.moderatorReply !== ''">
+            <button class="btn btn-link" data-toggle="collapse" (click)="value.showReply = true" 
+            [hidden]="value.showReply">
+              Show Reply
+            </button>
+            <button class="btn btn-link" data-toggle="collapse" (click)="value.showReply = false" 
+            [hidden]="!value.showReply">
+              Hide Reply
+            </button>
+          </div>
+
+          <div [hidden]="!value.showReply || value.moderatorReply == ''" 
+          class="collapse show" data-parent="#accordion">
+            <div class="card-body">
+              <div class="row">
+                <p class="float-right text-info font-weight-light w-100">
+                  Replied on: {{value.dateReplied | date }}
+                </p>
+                <p class="rigth">{{value.moderatorReply}}</p>
+              </div>
+            </div>
+          </div>
+
+        <div *ngIf="isAdmin && value.isVisible == false">
+            <button class="btn btn-outline-primary mb-1 float-right" 
+            (click)="updateForm(value.id); openVerticallyCentered(content)">Reply</button>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pb-2"></div>
+</div>
+
+  <ng-template #content let-c="close" let-d="dismiss">
+      <div class="modal-header">
+        <h4 class="modal-title">Modal title</h4>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <form novalidate [formGroup]="moderatorForm" (ngSubmit)="putReply(moderatorForm)" 
+          class="suggestion-form">
+
+            <input type="hidden" formControlName="id" />
+            <textarea formControlName="moderatorReply" placeholder="Reply to the suggestion" rows="5" 
+            class="suggestion-full-width form-control"></textarea>
+
+            <button [disabled]="moderatorForm.invalid" class="btn btn-primary">Submit</button>
+            <button (click)="value.showReply = false" class="btn btn-secondary">Cancel</button>
+          </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="c('Close click')">Close</button>
+      </div>
+    </ng-template>
+
+   
